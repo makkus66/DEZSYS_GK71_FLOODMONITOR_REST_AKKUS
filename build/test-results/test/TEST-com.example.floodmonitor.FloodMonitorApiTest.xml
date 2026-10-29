@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.floodmonitor.FloodMonitorApiTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-29T19:33:48" hostname="MSI" time="0.698">
+  <properties/>
+  <testcase name="allStationsAsJson()" classname="com.example.floodmonitor.FloodMonitorApiTest" time="0.568"/>
+  <testcase name="existingStation()" classname="com.example.floodmonitor.FloodMonitorApiTest" time="0.009"/>
+  <testcase name="filterByTimeRange()" classname="com.example.floodmonitor.FloodMonitorApiTest" time="0.01"/>
+  <testcase name="unsupportedFormat()" classname="com.example.floodmonitor.FloodMonitorApiTest" time="0.009"/>
+  <testcase name="invalidTimeRange()" classname="com.example.floodmonitor.FloodMonitorApiTest" time="0.006"/>
+  <testcase name="latestMeasurement()" classname="com.example.floodmonitor.FloodMonitorApiTest" time="0.006"/>
+  <testcase name="allStationsAsXml()" classname="com.example.floodmonitor.FloodMonitorApiTest" time="0.075"/>
+  <testcase name="maxLimit()" classname="com.example.floodmonitor.FloodMonitorApiTest" time="0.004"/>
+  <testcase name="unknownStation()" classname="com.example.floodmonitor.FloodMonitorApiTest" time="0.003"/>
+  <system-out><![CDATA[20:33:47.059 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.example.floodmonitor.FloodMonitorApiTest]: FloodMonitorApiTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+20:33:47.153 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.example.floodmonitor.FloodMonitorApplication for test class com.example.floodmonitor.FloodMonitorApiTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.0)
+
+2026-10-29T20:33:47.485+01:00  INFO 16912 --- [    Test worker] c.e.floodmonitor.FloodMonitorApiTest     : Starting FloodMonitorApiTest using Java 23.0.1 with PID 16912 (started by muham in C:\Users\muham\Desktop\Schule 26 27\SYT\DEZSYS_GK71_FLOODMONITOR_REST\DEZSYS_GK71_FLOODMONITOR_REST_AKKUS)
+2026-10-29T20:33:47.485+01:00  INFO 16912 --- [    Test worker] c.e.floodmonitor.FloodMonitorApiTest     : No active profile set, falling back to 1 default profile: "default"
+2026-10-29T20:33:48.208+01:00  INFO 16912 --- [    Test worker] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-10-29T20:33:48.462+01:00  INFO 16912 --- [    Test worker] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-10-29T20:33:48.462+01:00  INFO 16912 --- [    Test worker] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-10-29T20:33:48.478+01:00  INFO 16912 --- [    Test worker] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-10-29T20:33:48.494+01:00  INFO 16912 --- [    Test worker] c.e.floodmonitor.FloodMonitorApiTest     : Started FloodMonitorApiTest in 1.213 seconds (process running for 2.166)
+]]></system-out>
+  <system-err><![CDATA[WARNING: A Java agent has been loaded dynamically (C:\Users\muham\.gradle\caches\modules-2\files-2.1\net.bytebuddy\byte-buddy-agent\1.14.10\90ed94ac044ea8953b224304c762316e91fd6b31\byte-buddy-agent-1.14.10.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+]]></system-err>
+</testsuite>

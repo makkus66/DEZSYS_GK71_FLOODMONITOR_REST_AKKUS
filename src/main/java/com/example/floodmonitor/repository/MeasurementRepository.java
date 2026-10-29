@@ -33,4 +33,7 @@ public class MeasurementRepository {
         List<Measurement> list = findByStationId(stationId);
         return list.isEmpty() ? Optional.empty() : Optional.of(list.get(list.size() - 1));
     }
+    public void deleteAll() {
+        measurements.clear();
+    }
 }
