@@ -19,16 +19,18 @@ import java.util.Random;
 @Service
 @ConditionalOnProperty(name = "simulation.enabled", havingValue = "true", matchIfMissing = true)
 public class SimulationService {
-
     private static final Logger log = LoggerFactory.getLogger(SimulationService.class);
-
     private final StationRepository stationRepository;
     private final MeasurementRepository measurementRepository;
+    private final WarningLevelService warningLevelService;
     private final Random random = new Random();
 
-    public SimulationService(StationRepository stationRepository, MeasurementRepository measurementRepository) {
+    public SimulationService(StationRepository stationRepository,
+                             MeasurementRepository measurementRepository,
+                             WarningLevelService warningLevelService) {
         this.stationRepository = stationRepository;
         this.measurementRepository = measurementRepository;
+        this.warningLevelService = warningLevelService;
     }
 
     @Scheduled(fixedRateString = "${simulation.interval:10000}")
@@ -39,10 +41,11 @@ public class SimulationService {
             }
             Measurement previous = measurementRepository.findLatest(station.getId()).orElse(null);
             Measurement next = nextMeasurement(station, previous);
+            next.setWarningLevel(warningLevelService.calculate(station, next));
             measurementRepository.save(next);
-            log.info("{}: waterLevel={} cm, flowRate={} m³/s, rainfall={} mm/h, battery={} %, status={}",
+            log.info("{}: waterLevel={} cm, flowRate={} m3/s, rainfall={} mm/h, battery={} %, status={}, warningLevel={}",
                     next.getStationId(), next.getWaterLevel(), next.getFlowRate(),
-                    next.getRainfall(), next.getBatteryLevel(), next.getStatus());
+                    next.getRainfall(), next.getBatteryLevel(), next.getStatus(), next.getWarningLevel());
         }
     }
 
