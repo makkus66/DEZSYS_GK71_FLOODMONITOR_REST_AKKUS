@@ -1,5 +1,6 @@
 package com.example.floodmonitor.service;
 
+import com.example.floodmonitor.exception.BadRequestException;
 import com.example.floodmonitor.exception.NotFoundException;
 import com.example.floodmonitor.model.Alert;
 import com.example.floodmonitor.model.Measurement;
@@ -41,6 +42,8 @@ public class MeasurementService {
     public List<Measurement> getMeasurements(String stationId, Instant from, Instant to,
                                              Integer limit, WarningLevel warningLevel) {
         stationService.getStation(stationId);
+        validateRange(from, to);
+        validateLimit(limit);
         int max = limit == null ? DEFAULT_LIMIT : limit;
 
         List<Measurement> filtered = filter(stationId, from, to).stream()
@@ -53,6 +56,7 @@ public class MeasurementService {
 
     public Statistics getStatistics(String stationId, Instant from, Instant to) {
         stationService.getStation(stationId);
+        validateRange(from, to);
         List<Measurement> list = filter(stationId, from, to);
 
         if (list.isEmpty()) {
@@ -88,6 +92,18 @@ public class MeasurementService {
             alerts.add(new Alert(station, latest, level));
         }
         return alerts;
+    }
+
+    private void validateRange(Instant from, Instant to) {
+        if (from != null && to != null && from.isAfter(to)) {
+            throw new BadRequestException("Ungültiger Zeitraum: from (" + from + ") liegt nach to (" + to + ")");
+        }
+    }
+
+    private void validateLimit(Integer limit) {
+        if (limit != null && (limit < 1 || limit > MAX_LIMIT)) {
+            throw new BadRequestException("limit muss zwischen 1 und " + MAX_LIMIT + " liegen");
+        }
     }
 
     private List<Measurement> filter(String stationId, Instant from, Instant to) {
