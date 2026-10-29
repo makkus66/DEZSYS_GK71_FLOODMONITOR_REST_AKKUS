@@ -1,4 +1,4 @@
-openapi: 3.0.1
+git pull --rebaseopenapi: 3.0.1
 info:
   title: Flood Monitor REST API
   description: |-
