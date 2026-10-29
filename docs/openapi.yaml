@@ -1,0 +1,480 @@
+openapi: 3.0.1
+info:
+  title: Flood Monitor REST API
+  description: |-
+    REST-Schnittstelle eines Hochwasser-Frühwarnsystems. Alle Endpunkte liefern standardmäßig JSON, mit Accept: application/xml auch XML. Fehler werden einheitlich mit timestamp, status, error, message und path zurückgegeben.
+
+    Authentifizierung: Die API ist rein lesend (nur GET) und benötigt keine Authentifizierung.
+  version: v1
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+tags:
+- name: Stationen
+  description: "Messstationen, Messwerte und Statistik"
+- name: Warnungen
+  description: Aktuelle Hochwasserwarnungen
+paths:
+  /api/v1/stations:
+    get:
+      tags:
+      - Stationen
+      summary: Alle Messstationen abrufen
+      description: "Optional nach Fluss, Aktivität und aktueller Warnstufe filterbar."
+      operationId: getStations
+      parameters:
+      - name: river
+        in: query
+        description: Name des Flusses
+        required: false
+        schema:
+          type: string
+        example: Donau
+      - name: isActive
+        in: query
+        description: Nur aktive (true) oder inaktive (false) Stationen
+        required: false
+        schema:
+          type: boolean
+      - name: warningLevel
+        in: query
+        description: Aktuelle Warnstufe der Station
+        required: false
+        schema:
+          type: string
+          enum:
+          - NORMAL
+          - WARNING
+          - CRITICAL
+          - UNKNOWN
+      responses:
+        "200":
+          description: Liste der Stationen
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Station'
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Station'
+        "406":
+          description: Format nicht unterstützt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "400":
+          description: Ungültiger Filterwert
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/stations/{stationId}:
+    get:
+      tags:
+      - Stationen
+      summary: Einzelne Station abrufen
+      operationId: getStation
+      parameters:
+      - name: stationId
+        in: path
+        description: ID der Station
+        required: true
+        schema:
+          type: string
+        example: ST-001
+      responses:
+        "404":
+          description: Station nicht gefunden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "200":
+          description: Die Station
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Station'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Station'
+  /api/v1/stations/{stationId}/statistics:
+    get:
+      tags:
+      - Stationen
+      summary: Statistik einer Station abrufen
+      description: "Minimum, Maximum und Durchschnitt des Wasserstands, durchschnittlicher\
+        \ Durchfluss, Niederschlagssumme sowie Anzahl der Messungen, Warnungen und\
+        \ kritischen Warnungen."
+      operationId: getStatistics
+      parameters:
+      - name: stationId
+        in: path
+        description: ID der Station
+        required: true
+        schema:
+          type: string
+        example: ST-001
+      - name: from
+        in: query
+        description: Startzeitpunkt (ISO-8601)
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: to
+        in: query
+        description: Endzeitpunkt (ISO-8601)
+        required: false
+        schema:
+          type: string
+          format: date-time
+      responses:
+        "404":
+          description: Station nicht gefunden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "400":
+          description: Ungültiger Zeitraum oder Datumsformat
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "200":
+          description: Statistik
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Statistics'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Statistics'
+  /api/v1/stations/{stationId}/measurements:
+    get:
+      tags:
+      - Stationen
+      summary: Historische Messwerte abrufen
+      description: "Liefert die neuesten Messwerte im gewählten Zeitraum, maximal\
+        \ 'limit' Stück (Standard 100, höchstens 1000)."
+      operationId: getMeasurements
+      parameters:
+      - name: stationId
+        in: path
+        description: ID der Station
+        required: true
+        schema:
+          type: string
+        example: ST-001
+      - name: from
+        in: query
+        description: Startzeitpunkt (ISO-8601)
+        required: false
+        schema:
+          type: string
+          format: date-time
+        example: 2026-05-01T08:00:00Z
+      - name: to
+        in: query
+        description: Endzeitpunkt (ISO-8601)
+        required: false
+        schema:
+          type: string
+          format: date-time
+        example: 2026-05-01T12:00:00Z
+      - name: limit
+        in: query
+        description: Maximale Anzahl (1 bis 1000)
+        required: false
+        schema:
+          type: integer
+          format: int32
+        example: 100
+      - name: warningLevel
+        in: query
+        description: Nur Messwerte mit dieser Warnstufe
+        required: false
+        schema:
+          type: string
+          enum:
+          - NORMAL
+          - WARNING
+          - CRITICAL
+          - UNKNOWN
+      responses:
+        "200":
+          description: Liste der Messwerte
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Measurement'
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Measurement'
+        "404":
+          description: Station nicht gefunden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "400":
+          description: "Ungültiger Zeitraum, Datumsformat, limit oder Warnstufe"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/stations/{stationId}/measurements/latest:
+    get:
+      tags:
+      - Stationen
+      summary: Aktuellsten Messwert einer Station abrufen
+      operationId: getLatestMeasurement
+      parameters:
+      - name: stationId
+        in: path
+        description: ID der Station
+        required: true
+        schema:
+          type: string
+        example: ST-001
+      responses:
+        "404":
+          description: Station nicht gefunden oder noch keine Messwerte
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "200":
+          description: Der neueste Messwert
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Measurement'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Measurement'
+  /api/v1/alerts:
+    get:
+      tags:
+      - Warnungen
+      summary: Aktuelle Warnungen abrufen
+      description: "Liefert alle Stationen, deren aktueller Messwert WARNING oder\
+        \ CRITICAL ist."
+      operationId: getAlerts
+      parameters:
+      - name: river
+        in: query
+        description: Name des Flusses
+        required: false
+        schema:
+          type: string
+        example: Donau
+      - name: warningLevel
+        in: query
+        description: Nur WARNING oder nur CRITICAL
+        required: false
+        schema:
+          type: string
+          enum:
+          - NORMAL
+          - WARNING
+          - CRITICAL
+          - UNKNOWN
+      responses:
+        "200":
+          description: "Liste der Warnungen (leer, wenn keine aktiv ist)"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Alert'
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Alert'
+        "400":
+          description: Ungültige Warnstufe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+          format: int32
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+    Location:
+      type: object
+      properties:
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+    Station:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        river:
+          type: string
+        location:
+          $ref: '#/components/schemas/Location'
+        normalWaterLevel:
+          type: number
+          format: double
+        warningWaterLevel:
+          type: number
+          format: double
+        criticalWaterLevel:
+          type: number
+          format: double
+        status:
+          type: string
+          enum:
+          - ONLINE
+          - MAINTENANCE
+          - OFFLINE
+        isActive:
+          type: boolean
+    Statistics:
+      type: object
+      properties:
+        stationId:
+          type: string
+        minWaterLevel:
+          type: number
+          format: double
+        maxWaterLevel:
+          type: number
+          format: double
+        avgWaterLevel:
+          type: number
+          format: double
+        avgFlowRate:
+          type: number
+          format: double
+        totalRainfall:
+          type: number
+          format: double
+        measurementCount:
+          type: integer
+          format: int32
+        warningCount:
+          type: integer
+          format: int32
+        criticalCount:
+          type: integer
+          format: int32
+    Measurement:
+      type: object
+      properties:
+        stationId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        waterLevel:
+          type: number
+          format: double
+        flowRate:
+          type: number
+          format: double
+        rainfall:
+          type: number
+          format: double
+        temperature:
+          type: number
+          format: double
+        batteryLevel:
+          type: integer
+          format: int32
+        status:
+          type: string
+          enum:
+          - ONLINE
+          - MAINTENANCE
+          - OFFLINE
+        warningLevel:
+          type: string
+          enum:
+          - NORMAL
+          - WARNING
+          - CRITICAL
+          - UNKNOWN
+    Alert:
+      type: object
+      properties:
+        stationId:
+          type: string
+        stationName:
+          type: string
+        river:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        waterLevel:
+          type: number
+          format: double
+        warningLevel:
+          type: string
+          enum:
+          - NORMAL
+          - WARNING
+          - CRITICAL
+          - UNKNOWN
